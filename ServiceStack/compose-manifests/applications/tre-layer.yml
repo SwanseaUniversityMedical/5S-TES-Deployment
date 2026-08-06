@@ -238,3 +238,4 @@ services:
       - VaultSettings__MaxRetryAttempts=3
       - ConnectionStrings__CredentialsConnection=Server=postgres;Port=5432;Database=TRE_Credentials;User Id=${PGLOGIN};Password=${PGPASSWORD};
       - ConnectionStrings__TREPostgresConnection=Server=${TRE_DATA_SERVER};Port=${TRE_DATA_PORT};Database=${TRE_DATA_DATABASE};User Id=${TRE_DATA_USER};Password=${TRE_DATA_PASSWORD};
+      - FlowSettings__JWT=${TRE_KEYCLOAK_URL}/realms/Dare-TRE/protocol/openid-connect/certs
