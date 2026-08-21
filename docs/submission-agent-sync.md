@@ -27,7 +27,6 @@ Hangfire runs inside the `treapi` container (not a separate service). Configurat
 comes from `ServiceStack/compose-manifests/applications/tre-layer.yml` and `.env`:
 
 ```
-Hangfire__EnableExternalHangfire = ${EnableExternalHangfire}   # true
 Hangfire__Username              = ${HangfireUser}              # admin
 Hangfire__Password              = ${HangfirePassword}          # password
 JobSettings__scanSchedule       = ${scanSchedule}               # minutes, default 1

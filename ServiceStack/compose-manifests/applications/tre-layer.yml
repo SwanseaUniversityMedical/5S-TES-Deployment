@@ -100,7 +100,6 @@ services:
       - Logging__LogLevel__Default=${SerilogLevel}
       - ApiEndpoints__SubmissionApiUrl=${SubmissionAPIAddressURL}
       - ApiEndpoints__EgressApiUrl=http://DataEgressAPI:8080
-      - Hangfire__EnableExternalHangfire=${EnableExternalHangfire}
       - Hangfire__Username=${HangfireUser}
       - Hangfire__Password=${HangfirePassword}
       - AgentSettings__UseTESK=${UseTESK}
