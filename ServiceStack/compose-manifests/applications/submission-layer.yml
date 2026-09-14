@@ -88,8 +88,8 @@ services:
       - RabbitMQ__Username=guest
       - RabbitMQ__Password=${RabbitMQDefaultPassword}
       # Minio settings
-      - MinioSettings__Url=http://rustfs_submission:9000
-      - MinioSettings__AdminConsole=http://rustfs_submission:9001
+      - MinioSettings__Url=${SubmissionS3ApiUrl}
+      - MinioSettings__AdminConsole=${SubmissionS3ConsoleUrl}
       - MinioSettings__AccessKey=${SubmissionS3RootUser}
       - MinioSettings__SecretKey=${SubmissionS3RootPass}
       # Submission Keycloak settings
@@ -126,3 +126,4 @@ services:
     #  To resolve keycloak hostname for local development
     extra_hosts:
       - "keycloak.localtest.me:host-gateway"
+      - "sub-s3-api.localtest.me:host-gateway"
