@@ -11,35 +11,63 @@ ARCH=$(uname -m)
 echo "Detected OS: $OS ($ARCH)"
 
 
-# ---- Determine MinIO client URL ----
+# ---- Determine RustFS client (rc) URL ----
 
-MC_URL=""
+# MinIO archived mc and pulled it from dl.min.io. RustFS ships its own CLI (rc)
+# which drives the same admin API, so pin a release and verify its checksum.
+
+RC_VERSION="v0.1.35"
+RC_PLATFORM=""
+RC_SHA256=""
 
 if [[ "$OS" == "Linux" ]]; then
-    MC_URL="https://dl.min.io/client/mc/release/linux-amd64/mc"
+    if [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+        RC_PLATFORM="linux-arm64"
+        RC_SHA256="3d8e125f878f295dedeb40a03a85c311588205601f5076fbc8b341fe40b41b1b"
+    else
+        RC_PLATFORM="linux-amd64"
+        RC_SHA256="f852392837e2b56c4785ea7f4e4a0e3f58a5df19fe317eb80bcc1bfaa41a2893"
+    fi
 
 elif [[ "$OS" == "Darwin" ]]; then
     if [[ "$ARCH" == "arm64" ]]; then
-        MC_URL="https://dl.min.io/client/mc/release/darwin-arm64/mc"
+        RC_PLATFORM="macos-arm64"
+        RC_SHA256="2ab756c1a55c13532a65e6ef78c2eab2e0d4321e81f251313b3fba860840d5c8"
     else
-        MC_URL="https://dl.min.io/client/mc/release/darwin-amd64/mc"
+        RC_PLATFORM="macos-amd64"
+        RC_SHA256="3be929f5d1cae028f143ba0c3557484e8df771c03b7105f98e1c87e5abb7f985"
     fi
 else
     echo "Unsupported OS: $OS"
     exit 1
 fi
 
+RC_URL="https://github.com/rustfs/cli/releases/download/${RC_VERSION}/rustfs-cli-${RC_PLATFORM}-${RC_VERSION}.tar.gz"
 
-# ---- Install MinIO Client (mc) -----
 
-if ! command -v mc &>/dev/null; then
-    echo "Installing MinIO client (mc)..."
-    echo "Download URL: $MC_URL"
+# ---- Install RustFS Client (rc) -----
 
-    sudo curl -L "$MC_URL" -o /usr/local/bin/mc
-    sudo chmod +x /usr/local/bin/mc
+if ! command -v rc &>/dev/null; then
+    echo "Installing RustFS client (rc) ${RC_VERSION} for ${RC_PLATFORM}..."
+    echo "Download URL: $RC_URL"
+
+    RC_TMPDIR=$(mktemp -d)
+    trap 'rm -rf "$RC_TMPDIR"' EXIT
+
+    # -f so an HTTP error fails the download instead of saving the error page.
+    curl -fL "$RC_URL" -o "$RC_TMPDIR/rc.tar.gz"
+
+    if command -v sha256sum &>/dev/null; then
+        echo "${RC_SHA256}  ${RC_TMPDIR}/rc.tar.gz" | sha256sum -c -
+    else
+        # macOS has shasum rather than sha256sum.
+        echo "${RC_SHA256}  ${RC_TMPDIR}/rc.tar.gz" | shasum -a 256 -c -
+    fi
+
+    tar -xzf "$RC_TMPDIR/rc.tar.gz" -C "$RC_TMPDIR" rc
+    sudo install -m 0755 "$RC_TMPDIR/rc" /usr/local/bin/rc
 else
-    echo "mc is already installed."
+    echo "rc is already installed."
 fi
 
 
@@ -47,7 +75,7 @@ fi
 
 echo "Configuring S3 client..."
 
-mc alias set tre-s3 http://localhost:9002 s3-tre s3-tre-pass || {
+rc alias set tre-s3 http://localhost:9002 s3-tre s3-tre-pass || {
     echo "ERROR: Unable to connect to S3 TRE."
     echo "Make sure S3 TRE is running at http://localhost:9002"
     exit 1
@@ -56,13 +84,23 @@ mc alias set tre-s3 http://localhost:9002 s3-tre s3-tre-pass || {
 
 # ---- Create Access Keys ----
 
-echo "Fetching S3 TRE Access Key..."
+# `rc admin service-account create` takes the credentials as arguments, whereas
+# `mc admin user svcacct add` generated them and printed them back. Mint a
+# random pair here and hand it to rc.
 
-SA_JSON=$(mc admin user svcacct add tre-s3 s3-tre --json)
+echo "Creating S3 TRE service account..."
 
-ACCESS_KEY=$(echo "$SA_JSON" | grep -o '"accessKey":"[^"]*"' | cut -d'"' -f4)
-SECRET_KEY=$(echo "$SA_JSON" | grep -o '"secretKey":"[^"]*"' | cut -d'"' -f4)
+rand_str() { LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c "$1"; }
 
+ACCESS_KEY="funnel$(rand_str 14)"
+SECRET_KEY=$(rand_str 40)
+
+rc admin service-account create tre-s3 "$ACCESS_KEY" "$SECRET_KEY" \
+    --user s3-tre \
+    --name funnel >/dev/null || {
+    echo "ERROR: Unable to create the S3 TRE service account."
+    exit 1
+}
 
 
 # ---- Install Funnel ----
