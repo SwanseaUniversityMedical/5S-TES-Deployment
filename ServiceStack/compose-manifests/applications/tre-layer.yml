@@ -107,6 +107,8 @@ services:
       - JobSettings__syncSchedule=${syncSchedule}
       - JobSettings__healthCheckSchedule=${healthCheckSchedule}
       - JobSettings__DaysBeforeHealthLogDeletion=${daysBeforeHealthLogDeletion}
+      - JobSettings__bucketCleanupSchedule=${bucketCleanupSchedule}
+      - JobSettings__DaysAfterExpiryBeforeBucketDeletion=${daysAfterExpiryBeforeBucketDeletion}
       - AgentSettings__TESKAPIURL=${TesAPIUrl}
       - AgentSettings__TESKOutputBucketPrefix=${TesOutputBucketPrefix}
       - TreName=${TreName}
@@ -234,5 +236,11 @@ services:
       - VaultSettings__SecretEngine=secret
       - VaultSettings__EnableRetry=true
       - VaultSettings__MaxRetryAttempts=3
+      # RustFS / S3 settings (used by create-s3-secret / delete-s3-user handlers)
+      - MinioSettings__Url=http://rustfs_TRE:9002
+      - MinioSettings__AccessKey=${TRES3RootUser}
+      - MinioSettings__SecretKey=${TRES3RootPass}
+      - MinioSettings__AdminConsole=http://rustfs_TRE:9003
+      - MinioSettings__Alias=dareminio
       - ConnectionStrings__CredentialsConnection=Server=postgres;Port=5432;Database=TRE_Credentials;User Id=${PGLOGIN};Password=${PGPASSWORD};
       - ConnectionStrings__TREPostgresConnection=Server=${TRE_DATA_SERVER};Port=${TRE_DATA_PORT};Database=${TRE_DATA_DATABASE};User Id=${TRE_DATA_USER};Password=${TRE_DATA_PASSWORD};

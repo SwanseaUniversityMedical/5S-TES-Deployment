@@ -13,7 +13,6 @@ User and Developer Guides can be found in the [documentation](https://docs.feder
 ├── ServiceStack/.   # Deployment files for all Services used by Submission and TRE
 ├── Diagram/         # Architecture or system diagrams
 ├── ansible/         # Ansible script to install funnel
-└── kubernetes/      # Kubernetes installation for Submission Layer
 └── README.md        # README.md
 ├── LICENCE.md       # LICENCE
 
