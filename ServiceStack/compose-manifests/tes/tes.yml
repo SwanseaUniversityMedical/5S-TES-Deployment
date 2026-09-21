@@ -12,15 +12,17 @@ services:
       - sub-net
 
   tes-minio-init:
-    image: minio/mc
+    # MinIO archived mc and pulled the minio/mc image from Docker Hub, so this
+    # init step now runs RustFS's own CLI against the same admin API.
+    image: rustfs/rc:v0.1.35
     depends_on:
       minioTRE:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      mc alias set local http://minioTRE:9000 ${TRES3RootUser} ${TRES3RootPass} &&
-      mc admin user add local ${FunnelMinioUser} ${FunnelMinioPass} &&
-      mc admin policy attach local readwrite --user ${FunnelMinioUser}
+      rc alias set local http://minioTRE:9000 ${TRES3RootUser} ${TRES3RootPass} &&
+      rc admin user add local ${FunnelMinioUser} ${FunnelMinioPass} &&
+      rc admin policy attach local readwrite --user ${FunnelMinioUser}
       "
     networks:
       - sub-net

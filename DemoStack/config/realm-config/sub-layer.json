@@ -1190,7 +1190,8 @@
       "secret": "1218304e-bf92-4706-83f6-912e0b04ecb9",
       "redirectUris": [
         "http://localhost:7220/*",
-        "http://submission.localtest.me:7220/*"
+        "http://submission.localtest.me:7220/*",
+        "https://localhost:7220/*"
       ],
       "webOrigins": [
         "+"

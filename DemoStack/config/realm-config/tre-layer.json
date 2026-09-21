@@ -1110,7 +1110,8 @@
         "http://localhost:8989/*",
         "http://localhost:3000/*",
         "http://tre.localtest.me:8989/*",
-        "http://agent.localtest.me:3000/*"
+        "http://agent.localtest.me:3000/*",
+        "https://localhost:7187/*"
       ],
       "webOrigins": [
         "+"
