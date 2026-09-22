@@ -159,7 +159,6 @@ services:
       # MINIO SUBMISSION settings
       - MinioSubSettings__Url=${SubmissionS3ApiUrl}
       # Credentials and DMN settings
-
       - DmnPath__Path=/app/ProcessModels
       - ApiEndpoints__TreApiUrl=${TreApiPublicUrl}
       # Vault settings
@@ -185,6 +184,7 @@ services:
     #  To resolve keycloak hostname for local development
     extra_hosts:
       - "keycloak.localtest.me:host-gateway"
+      - "sub-s3-api.localtest.me:host-gateway"
 
   # ----- TRE Agent - Camunda Worker -------
   # --------------------------------------------

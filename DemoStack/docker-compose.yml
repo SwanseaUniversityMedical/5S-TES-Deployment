@@ -19,8 +19,8 @@ include:
   - ../ServiceStack/compose-manifests/shared/auth.yml
   - ../ServiceStack/compose-manifests/shared/credentials.yml
 
-  # - OMOP Lite Service: (OMOP Lite - Optional - Uncomment to enable)
-  # - ../ServiceStack/compose-manifests/shared/omop-lite.yml
+  # - OMOP Lite Service: (OMOP Lite - Default to enable in DemoStack - Uncomment to disable)
+  - ../ServiceStack/compose-manifests/shared/omop-lite.yml
 
   # ----- Storage Services -----
   # (RustFS S3 - Submission & TRE)
@@ -68,4 +68,3 @@ volumes:
 networks:
   sub-net:
     driver: bridge
-
