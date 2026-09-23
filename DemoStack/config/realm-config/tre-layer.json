@@ -115,6 +115,15 @@
         "attributes": {}
       },
       {
+        "id": "707006a6-ab62-4ccc-88c6-c62245887132",
+        "name": "CamundaAccess",
+        "description": "CamundaAccess",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "c3092379-b6ae-4543-86f7-b684433bdf79",
+        "attributes": {}
+      },
+      {
         "id": "328d8b98-8f99-405f-8f2c-70bdb4fd6ed5",
         "name": "dare-control-admin",
         "description": "",
@@ -561,7 +570,8 @@
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
-        "default-roles-dare-tre"
+        "default-roles-dare-tre",
+        "CamundaAccess"
       ],
       "notBefore": 0,
       "groups": []
