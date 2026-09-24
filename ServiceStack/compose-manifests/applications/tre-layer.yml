@@ -71,6 +71,7 @@ services:
     restart: always
     networks:
       - sub-net
+      - zeebe-net
     ports:
       - 8072:8080
     # This is the volume for the process models to make the changes in the DMN table persistent
@@ -195,6 +196,7 @@ services:
     restart: always
     networks:
       - sub-net
+      - zeebe-net
     depends_on:
       zeebe:
         condition: service_healthy
