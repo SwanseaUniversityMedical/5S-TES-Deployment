@@ -6,6 +6,14 @@ services:
     image: postgres:17
     container_name: postgres
     restart: always
+    # Enable TLS using the image's bundled self-signed cert so clients can use SSL Mode=Require.
+    command:
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+      - -c
+      - ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
     environment:
       - POSTGRES_USER=${PGLOGIN}
       - POSTGRES_PASSWORD=${PGPASSWORD}
