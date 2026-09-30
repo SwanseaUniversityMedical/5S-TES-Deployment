@@ -60,4 +60,6 @@ volumes:
 networks:
   sub-net:
     driver: bridge
-
+  zeebe-net:
+    driver: bridge
+    internal: true
