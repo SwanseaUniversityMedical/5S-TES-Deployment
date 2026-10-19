@@ -2654,24 +2654,6 @@
       ]
     },
     {
-      "id": "1def9f96-16e0-45dc-92d7-cdcd20ecc686",
-      "alias": "Justin1",
-      "description": "",
-      "providerId": "basic-flow",
-      "topLevel": true,
-      "builtIn": false,
-      "authenticationExecutions": [
-        {
-          "authenticator": "auth-conditional-otp-form",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 0,
-          "autheticatorFlow": false,
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
       "id": "703aacc7-573f-4ead-8850-fa4149668632",
       "alias": "OTPForNonAPI",
       "description": "browser based authentication",
