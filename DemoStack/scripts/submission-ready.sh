@@ -22,11 +22,11 @@ echo "Updating .env..."
 
 if [[ "$(uname)" == "Darwin" ]]; then
     # macOS
-    sed -i '' "s|^DemoMode=.*|DemoMode=false|" "$ENV_FILE"
+    sed -i '' "s|^SeedDemoData=.*|SeedDemoData=false|" "$ENV_FILE"
     sed -i '' "s|^UseTESK=.*|UseTESK=true|" "$ENV_FILE"
 else
     # Linux and others
-    sed -i "s|^DemoMode=.*|DemoMode=false|" "$ENV_FILE"
+    sed -i "s|^SeedDemoData=.*|SeedDemoData=false|" "$ENV_FILE"
     sed -i "s|^UseTESK=.*|UseTESK=true|" "$ENV_FILE"
 fi
 
@@ -34,6 +34,9 @@ echo ".env updated successfully."
 
 
 # ---- Restart Docker Compose ----
+echo "Restarting Docker Compose..."
+
+docker compose down
 
 if docker compose up -d; then
     echo "Docker Compose completed successfully."

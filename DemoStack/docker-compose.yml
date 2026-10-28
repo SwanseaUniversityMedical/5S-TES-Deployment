@@ -13,19 +13,19 @@ include:
   # ----- Shared Services -----
   # - Platform Service: (PostgreSQL, Adminer, Serilog, RabbitMQ)
   # - Auth Service: (Keycloak)
-  # - Credentials Service: (Camunda, Connectors, Vault, OpenLDAP, LDAP Init, phpLDAPadmin, Elastic Search)
+  # - Credentials Service: (Camunda, Vault, OpenLDAP, LDAP Init, phpLDAPadmin, Elastic Search)
 
   - ../ServiceStack/compose-manifests/shared/platform.yml
   - ../ServiceStack/compose-manifests/shared/auth.yml
   - ../ServiceStack/compose-manifests/shared/credentials.yml
 
-  # - OMOP Lite Service: (OMOP Lite - Optional - Uncomment to enable)
-  # - ../ServiceStack/compose-manifests/shared/omop-lite.yml
+  # - OMOP Lite Service: (OMOP Lite - Default to enable in DemoStack - Uncomment to disable)
+  - ../ServiceStack/compose-manifests/shared/omop-lite.yml
 
   # ----- Storage Services -----
-  # - (MinIO - Submission & TRE)
-  - ../ServiceStack/compose-manifests/storage/minio-submission.yml
-  - ../ServiceStack/compose-manifests/storage/minio-tre.yml
+  # (RustFS S3 - Submission & TRE)
+  - ../ServiceStack/compose-manifests/storage/s3-tre.yml
+  - ../ServiceStack/compose-manifests/storage/s3-submission.yml
 
 # ----- Volumes -----
 
@@ -34,9 +34,9 @@ volumes:
     driver: local
   postgresql_kc:
     driver: local
-  minioSubmission_data:
+  s3_submission_data:
     driver: local
-  minioTRE_data:
+  s3_TRE_data:
     driver: local
   seq_data:
     driver: local
@@ -68,41 +68,6 @@ volumes:
 networks:
   sub-net:
     driver: bridge
-
-configs:
-  connectors-config:
-    content: |
-      camunda:
-        client:
-          mode: self-managed
-          grpc-address: http://orchestration:26500
-          rest-address: http://orchestration:8080
-
-  orchestration-config:
-    content: |
-      management.endpoints.configprops.show-values: always
-      camunda:
-        system:
-          cpu-thread-count: "3"
-          io-thread-count: "3"
-        security:
-          authentication:
-            method: "basic"
-            unprotectedApi: true
-          authorizations:
-            enabled: false
-          initialization:
-            users:
-              - username: ${CamundaUsername}
-                password: ${CamundaPassword}
-                name: "Camunda User"
-                email: "camunda@camunda.com"
-            defaultRoles.admin.users:
-              - ${CamundaUsername}
-        database.index.numberOfReplicas: 0 # Single node elasticsearch so we disable replication
-        data:
-          secondary-storage:
-            type: elasticsearch
-            elasticsearch:
-              cluster-name: elasticsearch
-              url: "http://elasticsearch:9200"
+  zeebe-net:
+    driver: bridge
+    internal: true

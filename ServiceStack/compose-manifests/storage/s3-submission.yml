@@ -1,0 +1,63 @@
+services:
+  # grant the necessary permissions to RUSTFS volumes path
+  rustfs_submission_perms:
+    image: alpine
+    user: root
+    volumes:
+      - s3_submission_data:/data/rustfs
+    command: chown -R 10001:10001 /data/rustfs
+    networks:
+      - sub-net
+
+  rustfs_submission:
+    security_opt:
+      - "no-new-privileges:true"
+    image: rustfs/rustfs:1.0.0-beta.8
+    container_name: rustfs_submission
+    ports:
+      - "9000:9000" # S3 API port
+      - "9001:9001" # Console port
+    environment:
+      - RUSTFS_VOLUMES=/data/rustfs
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=*
+      - RUSTFS_ACCESS_KEY=${SubmissionS3RootUser}
+      - RUSTFS_SECRET_KEY=${SubmissionS3RootPass}
+      - RUSTFS_OBS_LOGGER_LEVEL=info
+      - RUSTFS_IDENTITY_OPENID_ENABLE=true
+      - RUSTFS_IDENTITY_OPENID_CONFIG_URL=${SUBMISSION_KEYCLOAK_URL}/realms/Dare-Control
+      - RUSTFS_IDENTITY_OPENID_CLIENT_ID=Dare-Control-S3
+      - RUSTFS_IDENTITY_OPENID_OTHER_AUDIENCES=Dare-Control-UI,Dare-Control-UI-long,Dare-Control-API,Dare-Control-S3,Dare-Control-Minio
+      - RUSTFS_IDENTITY_OPENID_CLIENT_SECRET=${SubmissionS3OpenidSecret}
+      - RUSTFS_IDENTITY_OPENID_SCOPES=openid
+      - RUSTFS_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC=off
+      - RUSTFS_IDENTITY_OPENID_REDIRECT_URI=${SubmissionS3ConsoleUrl}/rustfs/admin/v3/oidc/callback/default
+      - RUSTFS_IDENTITY_OPENID_DISPLAY_NAME=KeyCloak
+      - RUSTFS_IDENTITY_OPENID_CLAIM_NAME=policy
+    volumes:
+      - s3_submission_data:/data/rustfs
+    networks:
+      - sub-net
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh",
+          "-c",
+          "curl -f http://127.0.0.1:9000/health && curl -f http://127.0.0.1:9001/rustfs/console/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"
+    depends_on:
+      rustfs_submission_perms:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy

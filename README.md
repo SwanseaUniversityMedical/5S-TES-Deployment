@@ -1,5 +1,5 @@
 # 5S-TES Environment
-Dev and Demo Environment for Five Safes - TES Project.
+Deployment Samples for [Five Safes TES](https://github.com/SwanseaUniversityMedical/5s-Tes).
 User and Developer Guides can be found in the [documentation](https://docs.federated-analytics.ac.uk/).
 
 
@@ -7,13 +7,14 @@ User and Developer Guides can be found in the [documentation](https://docs.feder
 
 ```bash
 .
-├── AllInOne/      # Demonstration instance of the stack
-├── ansible/       # Ansible script to install funnel
-├── DemoStack/     # Demonstration instance of the stack (for dev and demonstration purposes)
-├── Submission/    # Deploy an instance of the Submission Layer
-├── TRE/           # Deploy an instance of the TRE Agent
-├── Diagram/       # Architecture or system diagrams
-└── README.md      # This is a readme file.
+├── DemoStack/       # Demonstration instance of the stack (for dev and demonstration purposes)
+├── DeploymentStack/ # Deployment files for Submission and TRE layers
+
+├── ServiceStack/.   # Deployment files for all Services used by Submission and TRE
+├── Diagram/         # Architecture or system diagrams
+├── ansible/         # Ansible script to install funnel
+└── README.md        # README.md
+├── LICENCE.md       # LICENCE
 
 ```
 ## DemoStack
@@ -21,20 +22,17 @@ A Simple Demonstrator instance of the complete stack, intended to be run locally
 ```bash
 .
 ├── config/
-│   ├── ldap-init/
-│   │   └── init.ldif           # LDAP initialisation file
-│   ├── realm-config/
-│   │   ├── sub-layer.json      # Keycloak Submission realm config
-│   │   ├── tre-layer.json      # Keycloak TRE realm config
-│   │   └── egress-layer.json   # Keycloak Egress realm config
-│   ├── vault-config/           # Vault configuration files
-│   └── init.sql                # SQL script for DB initialisation
-├── scripts/
-│    ├── funnel.sh              # Script to automate funnel setup
-│    └── setup.sh               # Script to automate demo stack setup
-├── .env                        # Environment variables
-├── starter.sh                  # Script to re-start the demo stack with updated vars
-└──docker-compose.yml           # All-in-One demonstrator docker compose
+│   ├── funnel-config.yml   # Funnel configuration file
+│   ├── funnel-work-dir     # Working directory for funnel
+│   ├── init.sql            # SQL script for DB initialisation
+│   ├── ldap-init           # LDAP initialisation files
+│   └── realm-config        # Keycloak realm config for Submission, TRE and Egress
+├── docker-compose.yml      # Demonstrator docker compose
+├── .env                    # Environment variables
+└── scripts
+    ├── funnel.sh           # Script to automate funnel setup
+    ├── starter.sh          # Script to automate demo stack setup
+    └── submission-ready.sh # Script to automate submission setup
 ```
 
 ### To add New Services to the DemoStack
@@ -83,8 +81,8 @@ DeploymentStack/Submission/
 The docker compose includes:
 - Submission UI & Submission API
 - Keycloak (Submission realm defined in `config/realm-config/sub-layer.json`)
-- PostgreSQL | RabbitMQ | Seq | Nginx
-- Submission MinIO
+- PostgreSQL | RabbitMQ | Seq | Nginx 
+- Submission RustFS
 
 ## TRE
 ```bash
@@ -105,5 +103,32 @@ The docker compose includes:
 - TRE Agent UI & TRE Agent API
 - Egress UI & Egress API
 - Keycloak (TRE & Egress realms defined in `config/realm-config/`)
+- Credential Services: Camunda | Connectors | Vault | OpenLDAP | LDAP Init | phpLDAPadmin | Elastic Search
 - PostgreSQL | RabbitMQ | Seq | Nginx
-- TRE Agent MinIO
+- TRE Agent RustFS
+
+## Getting a Vault Token (Submission / TRE DeploymentStacks)
+
+Both `DeploymentStack/Submission` and `DeploymentStack/TRE` run HashiCorp Vault in **config file mode** (`VaultStartupCommand="vault server -config=/vault/config/config.json"`), not dev mode. This means Vault starts **uninitialized and sealed** — it will not generate a root token automatically, and its healthcheck (and anything depending on it, e.g. `submissionAPI`) will not pass until it is initialized and unsealed manually.
+
+1. Start the stack as normal (`docker compose up -d`). The `vault` container will come up but report `health: starting` / unhealthy — this is expected at this point.
+2. Initialize Vault (only needed once per Vault data volume):
+   ```bash
+   docker exec vault vault operator init -key-shares=1 -key-threshold=1
+   ```
+   This prints a single **unseal key** and a **root token**. Save both somewhere safe (e.g. a password manager) — they are not shown again, and losing the unseal key permanently locks out any secrets stored in Vault's data volume.
+   - `-key-shares=1 -key-threshold=1` is used here for simplicity on a single local instance. For a real production deployment, use Vault's defaults (5 shares / 3 threshold) or your organisation's key-management process instead.
+3. Unseal Vault with the key from step 2:
+   ```bash
+   docker exec vault vault operator unseal <unseal_key>
+   ```
+4. Put the root token from step 2 into the stack's `.env` file:
+   ```
+   VaultRootToken=<root_token>
+   ```
+5. Recreate the dependent services so they pick up the token:
+   ```bash
+   docker compose up -d
+   ```
+
+**Note:** Because this is file storage (not dev mode), Vault re-seals every time the container restarts. After any restart, repeat step 3 (`vault operator unseal <unseal_key>`) before dependent services will become healthy — no need to repeat step 2 or generate a new token.

@@ -29,7 +29,7 @@
   "oauth2DevicePollingInterval": 5,
   "enabled": true,
   "sslRequired": "none",
-  "registrationAllowed": true,
+  "registrationAllowed": false,
   "registrationEmailAsUsername": false,
   "rememberMe": false,
   "verifyEmail": false,
@@ -37,7 +37,7 @@
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
-  "bruteForceProtected": false,
+  "bruteForceProtected": true,
   "permanentLockout": false,
   "maxTemporaryLockouts": 0,
   "bruteForceStrategy": "MULTIPLE",
@@ -380,7 +380,7 @@
         }
       ],
       "Dare-TRE-API": [],
-      "Dare-TRE-Minio": [],
+      "Dare-TRE-S3": [],
       "account": [
         {
           "id": "c8db8351-1547-4038-8f32-41270c723166",
@@ -577,12 +577,12 @@
     },
     {
       "id": "1299233f-ce01-4b30-9e25-d76651cc422b",
-      "username": "service-account-dare-tre-minio",
+      "username": "service-account-Dare-TRE-S3",
       "emailVerified": false,
       "createdTimestamp": 1709044922892,
       "enabled": true,
       "totp": false,
-      "serviceAccountClientId": "Dare-TRE-Minio",
+      "serviceAccountClientId": "Dare-TRE-S3",
       "disableableCredentialTypes": [],
       "requiredActions": [
         "CONFIGURE_TOTP"
@@ -915,7 +915,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "e9021a57-3f4f-4254-ba27-2cdbb99a2cb5",
       "redirectUris": [
-        "http://localhost:5034/*"
+        "http://tre.localtest.me:8989/*"
       ],
       "webOrigins": [
         "+"
@@ -1009,8 +1009,8 @@
     },
     {
       "id": "7b146416-23d3-4cb4-a438-7c7b93b0ee70",
-      "clientId": "Dare-TRE-Minio",
-      "name": "Dare-TRE-Minio",
+      "clientId": "Dare-TRE-S3",
+      "name": "Dare-TRE-S3",
       "description": "",
       "rootUrl": "${authBaseUrl}",
       "adminUrl": "${authBaseUrl}",
@@ -1029,7 +1029,7 @@
       "consentRequired": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
+      "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": true,
       "publicClient": false,
       "frontchannelLogout": true,
@@ -1133,7 +1133,10 @@
       "secret": "2de114bc-3599-45f1-9b61-5090c6859dfe",
       "redirectUris": [
         "http://localhost:8989/*",
-        "http://localhost:3000/*"
+        "http://localhost:3000/*",
+        "http://tre.localtest.me:8989/*",
+        "http://agent.localtest.me:3000/*",
+        "https://localhost:7187/*"
       ],
       "webOrigins": [
         "+"
@@ -1142,7 +1145,7 @@
       "bearerOnly": false,
       "consentRequired": false,
       "standardFlowEnabled": true,
-      "implicitFlowEnabled": true,
+      "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": true,
       "publicClient": false,
@@ -2179,7 +2182,7 @@
         "subComponents": {},
         "config": {
           "kc.user.profile.config": [
-            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}],\"unmanagedAttributePolicy\":\"ENABLED\"}"
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"policy\",\"displayName\":\"Policy\",\"permissions\":{\"view\":[\"admin\"],\"edit\":[\"admin\"]},\"multivalued\":true}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
           ]
         }
       }

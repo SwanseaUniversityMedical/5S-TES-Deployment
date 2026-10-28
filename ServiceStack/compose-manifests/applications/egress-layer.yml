@@ -3,7 +3,7 @@ services:
   # -------------------------------------
 
   DataEgressUI:
-    image: harbor.ukserp.ac.uk:443/dare-trefx/control-egress-ui:3.0.3
+    image: harbor.ukserp.ac.uk:443/dare-trefx/control-egress-ui:3.0.4
     container_name: DataEgressUI
     restart: always
     networks:
@@ -13,8 +13,8 @@ services:
     depends_on:
       - DataEgressAPI
     environment:
-      - DemoMode=${DemoMode}
-      - KeyCloakDemoMode=${KeyCloakDemoMode}
+      - DemoMode=${SeedDemoData}
+      - KeycloakDemoMode=${KeyCloakDemoMode}
       - Serilog__SeqServerUrl=http://seq:5341
       # Data Egress Keycloak settings
       - DataEgressKeyCloakSettings__Authority=${TRE_KEYCLOAK_URL}/realms/Data-Egress/.well-known/openid-configuration
@@ -30,15 +30,19 @@ services:
       - DataEgressKeyCloakSettings__ProxyAddresURL=${proxyurl}
       - DataEgressKeyCloakSettings__BypassProxy="DataEgressUI,treAPI,seq-tre"
       - DataEgressAPISettings__Address=http://DataEgressAPI:8080
-      - MinioSettings__Url=${MINIO_TRE_UI_URL}
+      - S3Settings__Url=${TRES3ConsoleUrl}
+      - S3Settings__BucketPath=/rustfs/console/browser/?bucket=
       - sslcookies=${sslcookies}
       - httpsRedirect=${httpsRedirect}
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"
 
   # ----- Data Egress - API -----
   # -------------------------------------
 
   DataEgressAPI:
-    image: harbor.ukserp.ac.uk:443/dare-trefx/control-egress-api:3.0.3
+    image: harbor.ukserp.ac.uk:443/dare-trefx/control-egress-api:3.0.4
     container_name: DataEgressAPI
     restart: always
     networks:
@@ -48,14 +52,14 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
-      minioTRE:
+      rustfs_TRE:
         condition: service_healthy
     environment:
-      - DemoMode=${DemoMode}
-      - KeyCloakDemoMode=${KeyCloakDemoMode}
+      - DemoMode=${SeedDemoData}
+      - KeycloakDemoMode=${KeyCloakDemoMode}
       - DemoModeDefaultP=${DemoModePassword}
-      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DATA-Egress;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
-      - RabbitMQ__HostAddress=rabbitmq-tre
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DATA-Egress;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
+      - RabbitMQ__HostAddress=rabbitmq
       - Serilog__SeqServerUrl=http://seq:5341
       - TreKeyCloakSettings__Authority=${TRE_KEYCLOAK_URL}/realms/Dare-TRE/.well-known/openid-configuration
       - TreKeyCloakSettings__MetadataAddress=${TRE_KEYCLOAK_URL}/realms/Dare-TRE/.well-known/openid-configuration
@@ -63,13 +67,11 @@ services:
       - TreKeyCloakSettings__ClientId=Dare-TRE-API
       - TreKeyCloakSettings__ClientSecret=${TreAPIKeyCloakSecret}
       - TreKeyCloakSettings__ValidAudiences=Dare-TRE-API,Dare-TRE-UI
-      - TreKeyCloakSettings__TokenExpiredAddress=${TreAPIKeyCloakClientUIRedirectURL}/Account/LoginAfterTokenExpired
-      - TreKeyCloakSettings__RedirectURL=${TreAPIKeyCloakClientUIRedirectURL}
       - TreKeyCloakSettings__UseRedirectURL=false
       - TreKeyCloakSettings__Proxy=${useproxy}
       - TreKeyCloakSettings__ProxyAddresURL=${proxyurl}
       - TreKeyCloakSettings__BypassProxy="treAPI,seq-tre"
-      # Data Egress Keycloak settings?
+      # Data Egress Keycloak settings
       - DataEgressKeyCloakSettings__Authority=${TRE_KEYCLOAK_URL}/realms/Data-Egress/.well-known/openid-configuration
       - DataEgressKeyCloakSettings__MetadataAddress=${TRE_KEYCLOAK_URL}/realms/Data-Egress/.well-known/openid-configuration
       - DataEgressKeyCloakSettings__BaseUrl=${TRE_KEYCLOAK_URL}/realms/Data-Egress
@@ -82,10 +84,14 @@ services:
       - DataEgressKeyCloakSettings__Proxy=${useproxy}
       - DataEgressKeyCloakSettings__ProxyAddresURL=${proxyurl}
       - DataEgressKeyCloakSettings__BypassProxy="DataEgressUI,treAPI,seq-tre"
-      - MinioSettings__Url=http://minioTRE:9000
-      - MinioSettings__AccessKey=${TreMinioAdminUser}
-      - MinioSettings__SecretKey=${TreMinioAdminPassword}
-      - MinioSettings__BucketName=testbucket
-      - MinioSettings__AdminConsole=http://minioIn:9001
+      - MinioSettings__Url=http://rustfs_TRE:9002
+      - MinioSettings__AccessKey=${TRES3RootUser}
+      - MinioSettings__SecretKey=${TRES3RootPass}
+      - MinioSettings__AdminConsole=http://rustfs_TRE:9003
       - TreAPISettings__Address=http://treapi:8080
-      - DataEgressAPISettings__Address=http://DataEgressAPI:8100
+      # For local development
+      # - TreAPISettings__Address=http://host.docker.internal:8072
+      - DataEgressAPISettings__Address=http://DataEgressAPI:8080
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"

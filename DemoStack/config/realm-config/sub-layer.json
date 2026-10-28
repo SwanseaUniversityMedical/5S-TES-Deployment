@@ -7,7 +7,7 @@
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,
-  "accessTokenLifespan": 86400,
+  "accessTokenLifespan": 3600,
   "accessTokenLifespanForImplicitFlow": 900,
   "ssoSessionIdleTimeout": 3600,
   "ssoSessionMaxLifespan": 36000,
@@ -28,7 +28,7 @@
   "oauth2DeviceCodeLifespan": 86400,
   "oauth2DevicePollingInterval": 5,
   "enabled": true,
-  "sslRequired": "none",
+  "sslRequired": "external",
   "registrationAllowed": true,
   "registrationEmailAsUsername": false,
   "rememberMe": false,
@@ -37,7 +37,7 @@
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
-  "bruteForceProtected": false,
+  "bruteForceProtected": true,
   "permanentLockout": false,
   "maxTemporaryLockouts": 0,
   "bruteForceStrategy": "MULTIPLE",
@@ -64,9 +64,15 @@
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
-          "realm": ["offline_access", "uma_authorization"],
+          "realm": [
+            "offline_access",
+            "uma_authorization"
+          ],
           "client": {
-            "account": ["manage-account", "view-profile"]
+            "account": [
+              "manage-account",
+              "view-profile"
+            ]
           }
         },
         "clientRole": false,
@@ -115,7 +121,10 @@
         "description": "",
         "composite": true,
         "composites": {
-          "realm": ["offline_access", "uma_authorization"]
+          "realm": [
+            "offline_access",
+            "uma_authorization"
+          ]
         },
         "clientRole": false,
         "containerId": "2d79964b-f1eb-43e2-877f-035e7f420a3b",
@@ -216,7 +225,9 @@
           "composite": true,
           "composites": {
             "client": {
-              "realm-management": ["query-clients"]
+              "realm-management": [
+                "query-clients"
+              ]
             }
           },
           "clientRole": true,
@@ -302,7 +313,10 @@
           "composite": true,
           "composites": {
             "client": {
-              "realm-management": ["query-groups", "query-users"]
+              "realm-management": [
+                "query-groups",
+                "query-users"
+              ]
             }
           },
           "clientRole": true,
@@ -372,7 +386,7 @@
       ],
       "security-admin-console": [],
       "admin-cli": [],
-      "Dare-Control-Minio": [],
+      "Dare-Control-S3": [],
       "account-console": [],
       "Dare-Control-UI-Long": [
         {
@@ -412,7 +426,9 @@
           "composite": true,
           "composites": {
             "client": {
-              "account": ["manage-account-links"]
+              "account": [
+                "manage-account-links"
+              ]
             }
           },
           "clientRole": true,
@@ -471,7 +487,9 @@
           "composite": true,
           "composites": {
             "client": {
-              "account": ["view-consent"]
+              "account": [
+                "view-consent"
+              ]
             }
           },
           "clientRole": true,
@@ -488,11 +506,17 @@
       "path": "/dare-control-admin",
       "subGroups": [],
       "attributes": {
-        "policy": ["consoleAdmin"]
+        "policy": [
+          "consoleAdmin"
+        ]
       },
-      "realmRoles": ["default-roles-dare-control"],
+      "realmRoles": [
+        "default-roles-dare-control"
+      ],
       "clientRoles": {
-        "realm-management": ["manage-users"]
+        "realm-management": [
+          "manage-users"
+        ]
       }
     },
     {
@@ -540,7 +564,9 @@
     "clientRole": false,
     "containerId": "2d79964b-f1eb-43e2-877f-035e7f420a3b"
   },
-  "requiredCredentials": ["password"],
+  "requiredCredentials": [
+    "password"
+  ],
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,
@@ -555,7 +581,9 @@
   ],
   "localizationTexts": {},
   "webAuthnPolicyRpEntityName": "keycloak",
-  "webAuthnPolicySignatureAlgorithms": ["ES256"],
+  "webAuthnPolicySignatureAlgorithms": [
+    "ES256"
+  ],
   "webAuthnPolicyRpId": "",
   "webAuthnPolicyAttestationConveyancePreference": "not specified",
   "webAuthnPolicyAuthenticatorAttachment": "not specified",
@@ -566,7 +594,9 @@
   "webAuthnPolicyAcceptableAaguids": [],
   "webAuthnPolicyExtraOrigins": [],
   "webAuthnPolicyPasswordlessRpEntityName": "keycloak",
-  "webAuthnPolicyPasswordlessSignatureAlgorithms": ["ES256"],
+  "webAuthnPolicyPasswordlessSignatureAlgorithms": [
+    "ES256"
+  ],
   "webAuthnPolicyPasswordlessRpId": "",
   "webAuthnPolicyPasswordlessAttestationConveyancePreference": "not specified",
   "webAuthnPolicyPasswordlessAuthenticatorAttachment": "not specified",
@@ -622,10 +652,16 @@
       "totp": false,
       "serviceAccountClientId": "Dare-Control-UI-Long",
       "disableableCredentialTypes": [],
-      "requiredActions": ["CONFIGURE_TOTP"],
-      "realmRoles": ["default-roles-dare-control"],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ],
+      "realmRoles": [
+        "default-roles-dare-control"
+      ],
       "clientRoles": {
-        "Dare-Control-UI-Long": ["uma_protection"]
+        "Dare-Control-UI-Long": [
+          "uma_protection"
+        ]
       },
       "notBefore": 0,
       "groups": []
@@ -643,9 +679,39 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["dare-control-admin", "default-roles-dare-control"],
-      "groups": ["/dare-control-admin", "/dare-control-users"]
+      "realmRoles": [
+        "dare-control-admin",
+        "default-roles-dare-control"
+      ],
+      "groups": [
+        "/dare-control-admin",
+        "/dare-control-users"
+      ]
     },
+    {
+    "id" : "0d62886a-92d8-4460-af3a-79e792b1b477",
+    "username" : "dare-control-realm-user",
+    "emailVerified" : true,
+    "createdTimestamp" : 1784108306619,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "87b087af-eed8-4e66-9adf-b782b2f3a479",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1784108340130,
+      "secretData" : "{\"value\":\"ZXR6Wovd0vyVBgAyZP/KsvJ3pzsrq1vR75yyNAPqkXU=\",\"salt\":\"wHeob8+u4KTOMvNoxBO0BQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-dare-control" ],
+    "clientRoles" : {
+      "realm-management" : [ "manage-clients", "manage-users", "view-clients", "create-client", "query-clients", "view-realm" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  },
     {
       "username": "minioadmin",
       "enabled": true,
@@ -687,44 +753,64 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["dare-tre-admin", "default-roles-dare-control"]
+      "realmRoles": [
+        "dare-tre-admin",
+        "default-roles-dare-control"
+      ]
     }
   ],
   "scopeMappings": [
     {
       "clientScope": "Dare-Tre-Control-API-cs",
-      "roles": ["dare-tre-admin"]
+      "roles": [
+        "dare-tre-admin"
+      ]
     },
     {
       "clientScope": "Dare-Control-API-cs",
-      "roles": ["uma_authorization"]
+      "roles": [
+        "uma_authorization"
+      ]
     },
     {
       "clientScope": "minio-authorization",
-      "roles": ["uma_authorization"]
+      "roles": [
+        "uma_authorization"
+      ]
     },
     {
       "clientScope": "Dare-Tre-Control-UI-cs",
-      "roles": ["dare-tre-admin"]
+      "roles": [
+        "dare-tre-admin"
+      ]
     },
     {
       "clientScope": "Dare-Control-UI-cs",
-      "roles": ["uma_authorization"]
+      "roles": [
+        "uma_authorization"
+      ]
     },
     {
       "clientScope": "Dare-Control-UI-Long-cs",
-      "roles": ["uma_authorization"]
+      "roles": [
+        "uma_authorization"
+      ]
     },
     {
       "clientScope": "offline_access",
-      "roles": ["offline_access"]
+      "roles": [
+        "offline_access"
+      ]
     }
   ],
   "clientScopeMappings": {
     "account": [
       {
         "client": "account-console",
-        "roles": ["manage-account", "view-groups"]
+        "roles": [
+          "manage-account",
+          "view-groups"
+        ]
       }
     ]
   },
@@ -739,7 +825,9 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/realms/Dare-Control/account/*"],
+      "redirectUris": [
+        "/realms/Dare-Control/account/*"
+      ],
       "webOrigins": [],
       "notBefore": 0,
       "bearerOnly": false,
@@ -783,7 +871,9 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/realms/Dare-Control/account/*"],
+      "redirectUris": [
+        "/realms/Dare-Control/account/*"
+      ],
       "webOrigins": [],
       "notBefore": 0,
       "bearerOnly": false,
@@ -925,8 +1015,12 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "2e60b956-16bc-4dea-8b49-118a8baac5e5",
-      "redirectUris": ["http://localhost:5034/*"],
-      "webOrigins": ["+"],
+      "redirectUris": [
+        "http://localhost:5034/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
@@ -1017,8 +1111,8 @@
     },
     {
       "id": "c3ea3b00-4e31-4784-8112-4df204b7ce1e",
-      "clientId": "Dare-Control-Minio",
-      "name": "Dare-Control-Minio",
+      "clientId": "Dare-Control-S3",
+      "name": "Dare-Control-S3",
       "description": "",
       "rootUrl": "${authBaseUrl}",
       "adminUrl": "${authBaseUrl}",
@@ -1028,14 +1122,16 @@
       "alwaysDisplayInConsole": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "8a11bbcd-693a-4549-bda4-3e978fcf4de1",
-      "redirectUris": ["http://localhost:9001/*"],
+      "redirectUris": [
+        "http://localhost:9001/*"
+      ],
       "webOrigins": [],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
+      "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "publicClient": false,
       "frontchannelLogout": true,
@@ -1092,14 +1188,20 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "1218304e-bf92-4706-83f6-912e0b04ecb9",
-      "redirectUris": ["http://localhost:7220/*", "http://localhost:8888/*"],
-      "webOrigins": ["+"],
+      "redirectUris": [
+        "http://localhost:7220/*",
+        "http://submission.localtest.me:7220/*",
+        "https://localhost:7220/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
       "standardFlowEnabled": true,
-      "implicitFlowEnabled": true,
-      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": true,
       "publicClient": false,
       "frontchannelLogout": false,
@@ -1207,8 +1309,13 @@
       "alwaysDisplayInConsole": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
-      "redirectUris": ["https://localhost:7220/*"],
-      "webOrigins": ["/*"],
+      "redirectUris": [
+        "https://localhost:7220/*",
+        "http://submission.localtest.me:7220/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
@@ -1372,8 +1479,12 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/admin/Dare-Control/console/*"],
-      "webOrigins": ["+"],
+      "redirectUris": [
+        "/admin/Dare-Control/console/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
@@ -1902,12 +2013,12 @@
         },
         {
           "id": "e735e330-35a9-47a7-b18d-f26cc9d87042",
-          "name": "Dare-Control-Minio-cs",
+          "name": "Dare-Control-S3-cs",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "Dare-Control-Minio",
+            "included.client.audience": "Dare-Control-S3",
             "id.token.claim": "true",
             "access.token.claim": "true",
             "userinfo.token.claim": "true"
@@ -2214,50 +2325,13 @@
     "user": "hiru"
   },
   "eventsEnabled": false,
-  "eventsListeners": ["jboss-logging"],
+  "eventsListeners": [
+    "jboss-logging"
+  ],
   "enabledEventTypes": [],
   "adminEventsEnabled": false,
   "adminEventsDetailsEnabled": false,
-  "identityProviders": [
-    {
-      "alias": "ADDI",
-      "displayName": "ADDI Workbench",
-      "internalId": "59cb6f0e-518f-4f5d-b878-93e9f2f080ec",
-      "providerId": "oidc",
-      "enabled": true,
-      "updateProfileFirstLoginMode": "on",
-      "trustEmail": false,
-      "storeToken": false,
-      "addReadTokenRoleOnCreate": false,
-      "authenticateByDefault": false,
-      "linkOnly": false,
-      "hideOnLogin": false,
-      "firstBrokerLoginFlowAlias": "first broker login",
-      "config": {
-        "validateSignature": "true",
-        "acceptsPromptNoneForwardFromClient": "false",
-        "tokenUrl": "https://addib2c.b2clogin.com/addib2c.onmicrosoft.com/b2c_1a_signuporsignin_addiwb/oauth2/v2.0/token",
-        "clientId": "hiru",
-        "uiLocales": "false",
-        "jwksUrl": "https://addib2c.b2clogin.com/addib2c.onmicrosoft.com/b2c_1a_signuporsignin_addiwb/discovery/v2.0/keys",
-        "backchannelSupported": "false",
-        "issuer": "https://addib2c.b2clogin.com/c201a81c-a008-4c46-8128-ddebdd6ac1be/v2.0/",
-        "useJwksUrl": "true",
-        "loginHint": "false",
-        "pkceEnabled": "false",
-        "clientAuthMethod": "client_secret_post",
-        "authorizationUrl": "https://addib2c.b2clogin.com/addib2c.onmicrosoft.com/b2c_1a_signuporsignin_addiwb/oauth2/v2.0/authorize",
-        "disableUserInfo": "false",
-        "logoutUrl": "https://addib2c.b2clogin.com/addib2c.onmicrosoft.com/b2c_1a_signuporsignin_addiwb/oauth2/v2.0/logout",
-        "syncMode": "IMPORT",
-        "clientSecret": "**********",
-        "passMaxAge": "false",
-        "allowedClockSkew": "0",
-        "prompt": "login",
-        "guiOrder": "0"
-      }
-    }
-  ],
+  "identityProviders": [],
   "identityProviderMappers": [],
   "components": {
     "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
@@ -2287,7 +2361,9 @@
         "subType": "anonymous",
         "subComponents": {},
         "config": {
-          "allow-default-scopes": ["true"]
+          "allow-default-scopes": [
+            "true"
+          ]
         }
       },
       {
@@ -2297,7 +2373,9 @@
         "subType": "authenticated",
         "subComponents": {},
         "config": {
-          "allow-default-scopes": ["true"]
+          "allow-default-scopes": [
+            "true"
+          ]
         }
       },
       {
@@ -2307,8 +2385,12 @@
         "subType": "anonymous",
         "subComponents": {},
         "config": {
-          "host-sending-registration-request-must-match": ["true"],
-          "client-uris-must-match": ["true"]
+          "host-sending-registration-request-must-match": [
+            "true"
+          ],
+          "client-uris-must-match": [
+            "true"
+          ]
         }
       },
       {
@@ -2345,7 +2427,9 @@
         "subType": "anonymous",
         "subComponents": {},
         "config": {
-          "max-clients": ["200"]
+          "max-clients": [
+            "200"
+          ]
         }
       },
       {
@@ -2364,8 +2448,8 @@
         "subComponents": {},
         "config": {
           "kc.user.profile.config": [
-            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}],\"unmanagedAttributePolicy\":\"ENABLED\"}"
-          ]
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"policy\",\"displayName\":\"Policy\",\"permissions\":{\"view\":[\"admin\"],\"edit\":[\"admin\"]},\"multivalued\":true}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
+            ]
         }
       }
     ],
@@ -2376,8 +2460,12 @@
         "providerId": "rsa-enc-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"],
-          "algorithm": ["RSA-OAEP"]
+          "priority": [
+            "100"
+          ],
+          "algorithm": [
+            "RSA-OAEP"
+          ]
         }
       },
       {
@@ -2386,7 +2474,9 @@
         "providerId": "rsa-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"]
+          "priority": [
+            "100"
+          ]
         }
       },
       {
@@ -2395,7 +2485,9 @@
         "providerId": "aes-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"]
+          "priority": [
+            "100"
+          ]
         }
       },
       {
@@ -2404,8 +2496,12 @@
         "providerId": "hmac-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"],
-          "algorithm": ["HS256"]
+          "priority": [
+            "100"
+          ],
+          "algorithm": [
+            "HS256"
+          ]
         }
       },
       {
@@ -2414,8 +2510,12 @@
         "providerId": "hmac-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"],
-          "algorithm": ["HS512"]
+          "priority": [
+            "100"
+          ],
+          "algorithm": [
+            "HS512"
+          ]
         }
       }
     ]
@@ -2549,24 +2649,6 @@
           "priority": 20,
           "autheticatorFlow": true,
           "flowAlias": "Account verification options",
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
-      "id": "1def9f96-16e0-45dc-92d7-cdcd20ecc686",
-      "alias": "Justin1",
-      "description": "",
-      "providerId": "basic-flow",
-      "topLevel": true,
-      "builtIn": false,
-      "authenticationExecutions": [
-        {
-          "authenticator": "auth-conditional-otp-form",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 0,
-          "autheticatorFlow": false,
           "userSetupAllowed": false
         }
       ]

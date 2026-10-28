@@ -15,9 +15,8 @@ services:
     volumes:
       - data-protection:/root/.aspnet/DataProtection-Keys
     environment:
-      - DemoMode=${DemoMode}
       - UIName__Name=${AppName}
-      - KeyCloakDemoMode=${KeyCloakDemoMode}
+      - KeycloakDemoMode=${KeyCloakDemoMode}
       - Serilog__SeqServerUrl=http://seq:5341
       - Serilog__MinimumLevel__Default=${SerilogLevel}
       - Logging__LogLevel__Default=${SerilogLevel}
@@ -29,7 +28,8 @@ services:
       - httpsRedirect=${httpsRedirect}
       - SuppressAntiforgery=${SuppressAntiforgery}
       - URLSettingsFrontEnd__QueryImageSQL=${URLSettingsFrontEndQueryImageSQL}
-      - URLSettingsFrontEnd__MinioUrl=${submissionMinioAdminConsole}
+      - URLSettingsFrontEnd__S3BaseUrl=${SubmissionS3ConsoleUrl}
+      - URLSettingsFrontEnd__S3BucketPath=/rustfs/console/browser/?bucket=
       # Submission Keycloak settings
       - SubmissionKeyCloakSettings__Proxy=${useproxy}
       - SubmissionKeyCloakSettings__ProxyAddresURL=${proxyurl}
@@ -42,6 +42,9 @@ services:
       - SubmissionKeyCloakSettings__BaseUrl=${SUBMISSION_KEYCLOAK_URL}/realms/Dare-Control
       - SubmissionKeyCloakSettings__MetadataAddress=${SUBMISSION_KEYCLOAK_URL}/realms/Dare-Control/.well-known/openid-configuration
       - SubmissionKeyCloakSettings__Authority=${SUBMISSION_KEYCLOAK_URL}/realms/Dare-Control/
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"
 
   # ----- Submission API -----
   # ----------------------------------
@@ -68,27 +71,31 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      minioSubmission:
+      rustfs_submission:
+        condition: service_healthy
+      vault:
         condition: service_healthy
     environment:
-      - DemoMode=${DemoMode}
-      - KeyCloakDemoMode=${KeyCloakDemoMode}
-      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DARE-Control;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
-      - RabbitMQ__HostAddress=rabbitmq
+      - Features__SeedDemoData=${SeedDemoData}
+      - KeycloakDemoMode=${KeyCloakDemoMode}
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DARE-Control;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
       - Serilog__SeqServerUrl=http://seq:5341
       - Serilog__MinimumLevel__Default=${SerilogLevel}
       - Logging__LogLevel__Default=${SerilogLevel}
       - SuppressAntiforgery=${SuppressAntiforgery}
+      # RABBITMQ settings
+      - RabbitMQ__HostAddress=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=${RabbitMQDefaultPassword}
       # Minio settings
-      - MinioSettings__Url=http://minioSubmission:9000
-      - MinioSettings__AdminConsole=http://minioSubmission:9001
-      - MinioSettings__AccessKey=${MinioRootUser}
-      - MinioSettings__SecretKey=${MinioRootPass}
-      - MinioSettings__BucketName=testbucket
+      - MinioSettings__Url=${SubmissionS3ApiUrl}
+      - MinioSettings__AdminConsole=${SubmissionS3ConsoleUrl}
+      - MinioSettings__AccessKey=${SubmissionS3RootUser}
+      - MinioSettings__SecretKey=${SubmissionS3RootPass}
       # Submission Keycloak settings
       - SubmissionKeyCloakSettings__Proxy=${useproxy}
       - SubmissionKeyCloakSettings__ProxyAddresURL=${proxyurl}
-      - SubmissionKeyCloakSettings__BypassProxy=minioSubmission,seq
+      - SubmissionKeyCloakSettings__BypassProxy=rustfs_submission,seq
       - SubmissionKeyCloakSettings__TokenExpiredAddress=${SubmissionKeyCloakClientUIRedirectURL}/Account/LoginAfterTokenExpired
       - SubmissionKeyCloakSettings__UseRedirectURL=false
       - SubmissionKeyCloakSettings__RedirectURL=${SubmissionKeyCloakClientUIRedirectURL}
@@ -104,3 +111,19 @@ services:
       - SubmissionKeyCloakSettings__Realm=Dare-Control
       - SubmissionKeyCloakSettings__AutoTrustKeycloakCert=${SubmissionAutoTrustKeycloakCert}
       - SubmissionKeyCloakSettings__ValidIssuer=${SubmissionValidIssuer}
+      # Vault settings
+      - VaultSettings__BaseUrl=http://vault:8200
+      - VaultSettings__Token=${VaultRootToken}
+      - VaultSettings__TimeoutSeconds=30
+      - VaultSettings__SecretEngine=secret
+      - VaultSettings__EnableRetry=true
+      - VaultSettings__MaxRetryAttempts=3
+      # Keycloak admin API settings
+      - KeycloakAdmin__Username=${KeycloakAdmin__Username}
+      - KeycloakAdmin__Password=${KeycloakAdmin__Password}
+      # TRE onboarding JSON (public URLs reachable from remote TRE / Agent hosts)
+      - SubmissionApiUrl=${SubmissionApiUrl}
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"
+      - "sub-s3-api.localtest.me:host-gateway"

@@ -1,5 +1,4 @@
 services:
-
   # ------ Keycloak Identity Provider ------
   # ---------------------------------------------
 
@@ -11,10 +10,8 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres/keycloak
       KC_DB_USERNAME: ${PGLOGIN}
       KC_DB_PASSWORD: ${PGPASSWORD}
-      KC_HOSTNAME: http://${KeycloakHostName}:8085
-      KC_HOSTNAME_PORT: 8085
+      KC_HOSTNAME: ${KeycloakFullURL}
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
-      KEYCLOAK_FRONTEND_URL: http://${KeycloakHostName}:8085/auth
       KC_LOG_LEVEL: info
       KC_METRICS_ENABLED: true
       KC_HEALTH_ENABLED: true
@@ -22,10 +19,10 @@ services:
       KEYCLOAK_METRICS_ENABLED: true
       # Admin credentials
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KeycloakBootstrapAdminPassword}
     networks:
       - sub-net
-    command: start-dev  --import-realm #--verbose
+    command: ["${KeycloakStartupCommand}", "--import-realm"]
     depends_on:
       postgresql:
         condition: service_healthy

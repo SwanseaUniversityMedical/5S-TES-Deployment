@@ -19,8 +19,7 @@ services:
       - Serilog__SeqServerUrl=http://seq:5341
       - Serilog__MinimumLevel__Default=${SerilogLevel}
       - Logging__LogLevel__Default=${SerilogLevel}
-      - DemoMode=${DemoMode}
-      - KeyCloakDemoMode=${KeyCloakDemoMode}
+      - KeycloakDemoMode=${KeyCloakDemoMode}
       - sslcookies=${sslcookies}
       - httpsRedirect=${httpsRedirect}
       - TreKeyCloakSettings__AccountManagementURL=${TRE_KEYCLOAK_URL}/realms/Dare-TRE/account
@@ -30,12 +29,13 @@ services:
       - TreKeyCloakSettings__ClientId=Dare-TRE-UI
       - TreKeyCloakSettings__ClientSecret=${TreKeyCloakSecret}
       - TreKeyCloakSettings__ValidAudiences=Dare-TRE-API,Dare-TRE-UI
-      - TreKeyCloakSettings__TokenExpiredAddress=${TreKeyCloakClientUIRedirectURL}/Account/LoginAfterTokenExpired
-      - TreKeyCloakSettings__RedirectURL=${TreKeyCloakClientUIRedirectURL}
       - TreKeyCloakSettings__UseRedirectURL=false
       - TreKeyCloakSettings__Proxy=${useproxy}
       - TreKeyCloakSettings__ProxyAddresURL=${proxyurl}
       - TreKeyCloakSettings__BypassProxy="treAPI,seq-tre"
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"
 
   # ------ TRE Agent - Web (NextJS app) -------
   # -----------------------------------
@@ -55,10 +55,13 @@ services:
       - KEYCLOAK_URL=${TRE_KEYCLOAK_URL}
       - KEYCLOAK_CLIENT_ID=Dare-TRE-UI
       - KEYCLOAK_CLIENT_SECRET=${TreKeyCloakSecret}
-      - NEXT_PUBLIC_KEYCLOAK_URL=${NEXT_PUBLIC_KEYCLOAK_URL}
+      - NEXT_PUBLIC_KEYCLOAK_URL=${TRE_KEYCLOAK_URL}
       - NEXT_PUBLIC_KEYCLOAK_REALM=Dare-TRE
       - NEXT_PUBLIC_HELPDESK_URL=https://ukserp.atlassian.net/servicedesk/customer/portal/3
       - AGENT_API_URL=http://treapi:8080
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"
 
   # ------ TRE Agent - API -------
   # -----------------------------------
@@ -68,6 +71,7 @@ services:
     restart: always
     networks:
       - sub-net
+      - zeebe-net
     ports:
       - 8072:8080
     # This is the volume for the process models to make the changes in the DMN table persistent
@@ -78,35 +82,41 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      minioTRE:
+      rustfs_TRE:
         condition: service_healthy
       vault:
         condition: service_healthy
-      orchestration:
+      zeebe:
         condition: service_healthy
     environment:
       # General settings
-      - Features__DemoAllInOne=${DemoMode}
+      - Features__SeedDemoData=${SeedDemoData}
       - Features__EphemeralCredentials=true
-      - KeyCloakDemoMode=${KeyCloakDemoMode}
+      - KeycloakDemoMode=${KeyCloakDemoMode}
       - DemoModeDefaultP=${DemoModePassword}
-      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DARE-Tre;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
-      - ConnectionStrings__CredentialsConnection=Server=postgres;Port=5432;Database=TRE_Credentials;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
-      - RabbitMQ__HostAddress=rabbitmq
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DARE-Tre;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
+      - ConnectionStrings__CredentialsConnection=Server=postgres;Port=5432;Database=TRE_Credentials;User Id=${PGLOGIN};Password=${PGPASSWORD};TrustServerCertificate=True;
       - Serilog__SeqServerUrl=http://seq:5341
       - Serilog__MinimumLevel__Default=${SerilogLevel}
       - Logging__LogLevel__Default=${SerilogLevel}
-      - DareAPISettings__Address=${SubmissionAPIAddressURL}
-      - DataEgressAPISettings__Address=http://DataEgressAPI:8080
-      - Hangfire__EnableExternalHangfire=${EnableExternalHangfire}
+      - ApiEndpoints__SubmissionApiUrl=${SubmissionAPIAddressURL}
+      - ApiEndpoints__EgressApiUrl=http://DataEgressAPI:8080
       - Hangfire__Username=${HangfireUser}
       - Hangfire__Password=${HangfirePassword}
       - AgentSettings__UseTESK=${UseTESK}
       - JobSettings__scanSchedule=${scanSchedule}
       - JobSettings__syncSchedule=${syncSchedule}
+      - JobSettings__healthCheckSchedule=${healthCheckSchedule}
+      - JobSettings__DaysBeforeHealthLogDeletion=${daysBeforeHealthLogDeletion}
+      - JobSettings__bucketCleanupSchedule=${bucketCleanupSchedule}
+      - JobSettings__DaysAfterExpiryBeforeBucketDeletion=${daysAfterExpiryBeforeBucketDeletion}
       - AgentSettings__TESKAPIURL=${TesAPIUrl}
       - AgentSettings__TESKOutputBucketPrefix=${TesOutputBucketPrefix}
       - TreName=${TreName}
+      # RABBITMQ settings
+      - RabbitMQ__HostAddress=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=${RabbitMQDefaultPassword}
       # TRE UI Keycloak settings
       - TreKeyCloakSettings__Authority=${TRE_KEYCLOAK_URL}/realms/Dare-TRE/.well-known/openid-configuration
       - TreKeyCloakSettings__MetadataAddress=${TRE_KEYCLOAK_URL}/realms/Dare-TRE/.well-known/openid-configuration
@@ -114,8 +124,6 @@ services:
       - TreKeyCloakSettings__ClientId=Dare-TRE-UI
       - TreKeyCloakSettings__ClientSecret=${TreKeyCloakSecret}
       - TreKeyCloakSettings__ValidAudiences=Dare-TRE-API,Dare-TRE-UI
-      - TreKeyCloakSettings__TokenExpiredAddress=${TreKeyCloakClientUIRedirectURL}/Account/LoginAfterTokenExpired
-      - TreKeyCloakSettings__RedirectURL=${TreKeyCloakClientUIRedirectURL}
       - TreKeyCloakSettings__UseRedirectURL=false
       - TreKeyCloakSettings__Proxy=${useproxy}
       - TreKeyCloakSettings__ProxyAddresURL=${proxyurl}
@@ -140,39 +148,31 @@ services:
       - SubmissionKeyCloakSettings__ClientId=Dare-Control-API
       - SubmissionKeyCloakSettings__ClientSecret=${SubmissionAPIKeyCloakSecret}
       - SubmissionKeyCloakSettings__ValidAudiences=Dare-Control-UI,Dare-Control-API,Dare-Control-Minio
-      - SubmissionKeyCloakSettings__TokenExpiredAddress=${SubmissionAPIKeyCloakClientUIRedirectURL}/Account/LoginAfterTokenExpired
-      - SubmissionKeyCloakSettings__RedirectURL=${SubmissionAPIKeyCloakClientUIRedirectURL}
       - SubmissionKeyCloakSettings__UseRedirectURL=false
       - SubmissionKeyCloakSettings__Proxy=${useproxy}
       - SubmissionKeyCloakSettings__ProxyAddresURL=${proxyurl}
       - SubmissionKeyCloakSettings__BypassProxy="treAPI,seq-tre,minioSubmission"
       # MINIO TRE settings
-      - MinioTRESettings__Url=http://minioTRE:9000
-      - MinioTRESettings__AccessKey=${TreMinioAdminUser}
-      - MinioTRESettings__SecretKey=${TreMinioAdminPassword}
-      - MinioTRESettings__AdminConsole=http://minioTRE:9001
-      - MinioTRESettings__AWSRegion=us-east-1
+      - MinioTRESettings__Url=http://rustfs_TRE:9002
+      - MinioTRESettings__AccessKey=${TRES3RootUser}
+      - MinioTRESettings__SecretKey=${TRES3RootPass}
+      - MinioTRESettings__AdminConsole=http://rustfs_TRE:9003
       # MINIO SUBMISSION settings
-      - MinioSubSettings__Url=${submissionMinioUrl}
-      - MinioSubSettings__AccessKey=${MinioRootUser}
-      - MinioSubSettings__SecretKey=${MinioRootPass}
-      - MinioSubSettings__AdminConsole=${submissionMinioAdminConsole}
-      - MinioSubSettings__BucketName=testbucket
-      - MinioSubSettings__AWSRegion=us-east-1
+      - MinioSubSettings__Url=${SubmissionS3ApiUrl}
       # Credentials and DMN settings
-      - CredentialAPISettings__StartWebhookUrl=http://connectors:8080/inbound/StartCredentials
-      - CredentialAPISettings__RevokeWebhookUrl=http://connectors:8080/inbound/RevokeCredentials
       - DmnPath__Path=/app/ProcessModels
-      - TreAPISettings__Address=${TreApiPublicUrl}
+      - ApiEndpoints__TreApiUrl=${TreApiPublicUrl}
       # Vault settings
       - VaultSettings__BaseUrl=http://vault:8200
-      - VaultSettings__Token=dev-only-token
+      - VaultSettings__Token=${VaultRootToken}
       - VaultSettings__TimeoutSeconds=30
       - VaultSettings__SecretEngine=secret
       - VaultSettings__EnableRetry=true
       - VaultSettings__MaxRetryAttempts=3
+      - VaultSettings__VaultConfigPath=config
+      - VaultSettings__VaultConfigReloadInterval=10
       # Zeebe settings
-      - ZeebeBootstrap__Client__GatewayAddress=orchestration:26500
+      - ZeebeBootstrap__Client__GatewayAddress=zeebe:26500
       - ZeebeBootstrap__Worker__MaxJobsActive=5
       - ZeebeBootstrap__Worker__TimeoutInMilliseconds=5000
       - ZeebeBootstrap__Worker__PollIntervalInMilliseconds=1000
@@ -180,6 +180,12 @@ services:
       - ZeebeBootstrap__Worker__RetryTimeoutInMilliseconds=5000
       # Encryption settings
       - EncryptionSettings__Key=${EncryptionSettingsKey}
+      # Onboarding settings
+      - TreOnboardingConfig__IsConfigurationImported=false
+    #  To resolve keycloak hostname for local development
+    extra_hosts:
+      - "keycloak.localtest.me:host-gateway"
+      - "sub-s3-api.localtest.me:host-gateway"
 
   # ----- TRE Agent - Camunda Worker -------
   # --------------------------------------------
@@ -190,8 +196,9 @@ services:
     restart: always
     networks:
       - sub-net
+      - zeebe-net
     depends_on:
-      orchestration:
+      zeebe:
         condition: service_healthy
       openldap:
         condition: service_healthy
@@ -210,7 +217,7 @@ services:
       - Logging__LogLevel__Default=${SerilogLevel}
       - DmnPath__Path=/app/ProcessModels
       # Zeebe Bootstrap settings
-      - ZeebeBootstrap__Client__GatewayAddress=orchestration:26500
+      - ZeebeBootstrap__Client__GatewayAddress=zeebe:26500
       - ZeebeBootstrap__Worker__MaxJobsActive=5
       - ZeebeBootstrap__Worker__TimeoutInMilliseconds=5000
       - ZeebeBootstrap__Worker__PollIntervalInMilliseconds=1000
@@ -220,16 +227,22 @@ services:
       - LdapSettings__Host=openldap
       - LdapSettings__Port=389
       - LdapSettings__AdminDn=cn=admin,dc=camundaephemeral,dc=local
-      - LdapSettings__AdminPassword=admin
+      - LdapSettings__AdminPassword=${LDAPAdminPassword}
       - LdapSettings__BaseDn=dc=camundaephemeral,dc=local
       - LdapSettings__UserOu=ou=Users
       - LdapSettings__UseSSL=false
       # Vault settings
       - VaultSettings__BaseUrl=http://vault:8200
-      - VaultSettings__Token=dev-only-token
+      - VaultSettings__Token=${VaultRootToken}
       - VaultSettings__TimeoutSeconds=30
       - VaultSettings__SecretEngine=secret
       - VaultSettings__EnableRetry=true
       - VaultSettings__MaxRetryAttempts=3
-      - ConnectionStrings__CredentialsConnection=Server=postgres;Port=5432;Database=TRE_Credentials;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};
-      - ConnectionStrings__TREPostgresConnection=Server=${TRE_DATA_SERVER};Port=${TRE_DATA_PORT};Database=${TRE_DATA_DATABASE};Include Error Detail=true;User Id=${TRE_DATA_USER};Password=${TRE_DATA_PASSWORD};
+      # RustFS / S3 settings (used by create-s3-secret / delete-s3-user handlers)
+      - MinioSettings__Url=http://rustfs_TRE:9002
+      - MinioSettings__AccessKey=${TRES3RootUser}
+      - MinioSettings__SecretKey=${TRES3RootPass}
+      - MinioSettings__AdminConsole=http://rustfs_TRE:9003
+      - MinioSettings__Alias=dareminio
+      - ConnectionStrings__CredentialsConnection=Server=postgres;Port=5432;Database=TRE_Credentials;User Id=${PGLOGIN};Password=${PGPASSWORD};SSL Mode=Require;
+      - ConnectionStrings__TREPostgresConnection=Server=${TRE_DATA_SERVER};Port=${TRE_DATA_PORT};Database=${TRE_DATA_DATABASE};User Id=${TRE_DATA_USER};Password=${TRE_DATA_PASSWORD};SSL Mode=Require;

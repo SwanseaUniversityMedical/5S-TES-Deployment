@@ -14,8 +14,8 @@ include:
   - ../../ServiceStack/compose-manifests/shared/auth.yml
 
   # ----- Storage Services -----
-  # - (MinIO - Submission)
-  - ../../ServiceStack/compose-manifests/storage/minio-submission.yml
+  # - (RustFS S3 Submission)
+  - ../../ServiceStack/compose-manifests/storage/s3-submission.yml
 
 # ----- Volumes -----
 
@@ -24,7 +24,7 @@ volumes:
     driver: local
   postgresql_kc:
     driver: local
-  minioSubmission_data:
+  s3_submission_data:
     driver: local
   seq_data:
     driver: local
@@ -35,6 +35,10 @@ volumes:
   keycloak_data:
     driver: local
   data-protection:
+    driver: local
+  vault_data:
+    driver: local
+  vault_logs:
     driver: local
 
 # ----- Shared Network & Configs -----
