@@ -140,6 +140,15 @@
         "clientRole": false,
         "containerId": "c3092379-b6ae-4543-86f7-b684433bdf79",
         "attributes": {}
+      },
+      {
+        "id": "65f838f3-5ade-4321-8598-28b74cd9847e",
+        "name": "airlock-callback",
+        "description": "Director-Airlock review-completion callback: POST /api/Submission/AirlockResults on the TRE Agent",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "c3092379-b6ae-4543-86f7-b684433bdf79",
+        "attributes": {}
       }
     ],
     "client": {
@@ -661,6 +670,22 @@
         "dare-results-admin",
         "default-roles-dare-control"
       ]
+    },
+    {
+      "id": "f2982ba2-e813-4bbc-8cdc-4c4d8d13f09e",
+      "username": "service-account-airlock-callback",
+      "emailVerified": false,
+      "enabled": true,
+      "totp": false,
+      "serviceAccountClientId": "Airlock-Callback",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-dare-tre",
+        "airlock-callback"
+      ],
+      "notBefore": 0,
+      "groups": []
     }
   ],
   "scopeMappings": [
@@ -1303,6 +1328,50 @@
         "profile",
         "basic",
         "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "id": "e872170a-5355-4dc7-8729-ebe3b035f41f",
+      "clientId": "Airlock-Callback",
+      "name": "Airlock-Callback",
+      "description": "Used by Director-Airlock to call the TRE Agent when an Airlock review finishes. Dev secret only; replace per deployment.",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "airlock-callback-dev-secret",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "display.on.consent.screen": "false"
+      },
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email",
+        "DARE-TRE-API"
       ],
       "optionalClientScopes": [
         "address",
